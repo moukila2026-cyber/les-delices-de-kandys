@@ -1,39 +1,97 @@
-# Les Délices de Kandys — site vitrine
+# 🛍️ Global Shop Daloa
 
-Site vitrine responsive en français, conçu en HTML/CSS/JavaScript sans dépendance externe. `premium.css` apporte les finitions visuelles, animations, ajustements responsive et le fond décoratif du site (`assets/fond-site.jpg`, source PNG disponible). Les images de référence et les 10 nouveaux visuels sont intégrés dans `assets/`. La section « Nos réalisations » les classe par cuisine africaine, cuisine européenne, entrées, pâtisserie, anniversaires et mariages.
+**Votre boutique de confiance en Côte d'Ivoire**
 
-## Lancer en local
+Site vitrine e-commerce pour **Global Shop Daloa**, une boutique multi-catégories basée à Daloa et Bouaké, proposant des produits dans les domaines de l'électronique, la mode, la maison, la beauté, l'alimentation et le sport.
 
-Depuis ce dossier :
+## ✨ Fonctionnalités
+
+- 🏠 **Page d'accueil percutante** avec hero animé, collections vedettes et témoignages clients
+- 🛒 **Panier coulissant** persistant (sauvegardé en localStorage)
+- 📦 **40+ produits** réalistes avec descriptions, prix en FCFA et images
+- 🔍 **Filtres et tri** par prix, disponibilité et popularité
+- 📄 **Fiches produits détaillées** avec galeries d'images, avis clients et produits similaires
+- 💳 **Processus de paiement** simplifié en 2 étapes avec Mobile Money (Orange, MTN, Wave)
+- 💬 **Avis clients** réalistes et vérifiés
+- 📱 **100% responsive** - mobile, tablette et desktop
+- ✨ **Animations subtiles** avec Framer Motion
+
+## 🛠️ Stack Technique
+
+- **Framework** : [Next.js 16](https://nextjs.org/) (App Router)
+- **Styling** : [Tailwind CSS](https://tailwindcss.com/)
+- **Animations** : [Framer Motion](https://www.framer.com/motion/)
+- **Icônes** : [Lucide React](https://lucide.dev/)
+- **Langage** : TypeScript
+- **Pas de base de données** - Données en mémoire, panier en localStorage
+
+## 🚀 Installation
 
 ```bash
-python3 -m http.server 8080
+# Cloner le dépôt
+git clone https://github.com/VOTRE_USERNAME/global-shop-daloa.git
+cd global-shop-daloa
+
+# Installer les dépendances
+npm install
+
+# Lancer en développement
+npm run dev
+
+# Build pour la production
+npm run build
+npm start
 ```
 
-Puis ouvrir `http://localhost:8080`.
+## 📁 Structure du Projet
 
-## Formulaire de commande
-
-Le formulaire est 100 % côté navigateur : il prépare un message avec les champs saisis et l’ouvre dans le WhatsApp du restaurant (+225 01 02 15 03 03). Le client confirme l’envoi dans WhatsApp. Aucune commande n’est stockée sur le site et aucun backend/Supabase n’est nécessaire.
-
-## Déploiement GitHub → Vercel
-
-Depuis la racine du projet, après avoir créé un dépôt GitHub vide :
-
-```bash
-git init
-git add .
-git commit -m "Site vitrine Les Delices de Kandys"
-git branch -M main
-git remote add origin https://github.com/VOTRE-COMPTE/VOTRE-DEPOT.git
-git push -u origin main
+```
+src/
+├── app/                    # Pages Next.js (App Router)
+│   ├── page.tsx           # Page d'accueil
+│   ├── layout.tsx         # Layout principal
+│   ├── globals.css        # Styles globaux
+│   ├── products/[id]/     # Page détail produit
+│   ├── collections/[category]/ # Page collection
+│   └── checkout/          # Page de paiement
+├── components/            # Composants React
+│   ├── Header.tsx         # En-tête avec navigation
+│   ├── Footer.tsx         # Pied de page
+│   ├── CartDrawer.tsx     # Panier coulissant
+│   ├── ProductCard.tsx    # Carte produit
+│   ├── HeroSection.tsx    # Section héro
+│   ├── CategoryGrid.tsx   # Grille catégories
+│   ├── FeaturedProducts.tsx # Produits vedettes
+│   ├── PromoSection.tsx   # Bannières promo
+│   ├── TestimonialsSection.tsx # Témoignages
+│   └── LocationSection.tsx # Nos boutiques
+├── context/               # Context React
+│   └── CartContext.tsx    # Gestion du panier
+├── data/                  # Données mock
+│   ├── products.ts        # Catalogue produits (40+)
+│   ├── categories.ts      # Catégories
+│   ├── reviews.ts         # Avis clients
+│   └── types.ts           # Types TypeScript
+└── lib/                   # Utilitaires
+    └── utils.ts           # Fonctions helpers
 ```
 
-Remplacez l’URL par celle de votre dépôt. Puis, dans Vercel, importez ce dépôt et choisissez le préréglage **Other** ; laissez les commandes de build et d’installation vides et définissez le dossier de sortie sur `.` (racine du dépôt). Déployez : aucune variable d’environnement ni configuration Supabase n’est nécessaire.
+## 💰 Modes de Paiement
 
-## Coordonnées affichées
+- 📱 Orange Money
+- 📱 MTN Mobile Money
+- 📱 Wave
+- 💵 Paiement à la livraison (Cash)
 
-- Téléphone : +225 01 02 15 04 03
-- Téléphone : +225 05 84 16 20 72
-- WhatsApp : +225 01 02 15 03 03
-- Daloa, Côte d’Ivoire
+## 📍 Localisation
+
+- **Daloa** : Quartier Commerce, face à la Cathédrale
+- **Bouaké** : Grand Marché, Rue du Commerce
+
+## 📄 Licence
+
+Ce projet est propriété de Global Shop Daloa.
+
+---
+
+Développé avec ❤️ pour Global Shop Daloa
