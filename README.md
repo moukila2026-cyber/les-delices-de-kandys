@@ -37,3 +37,20 @@ Remplacez l’URL par celle de votre dépôt. Puis, dans Vercel, importez ce dé
 - Téléphone : +225 05 84 16 20 72
 - WhatsApp : +225 01 02 15 03 03
 - Daloa, Côte d’Ivoire
+
+## Dossier de présentation (PDF)
+
+`dossier/les-delices-de-kandys-dossier.pdf` est le dossier remis au propriétaire : présentation
+de l'établissement, prestations, réalisations, présentation du site et **code QR** qui ouvre
+directement le site.
+
+Pour le régénérer après une modification du site (textes, photos, coordonnées, URL) :
+
+```bash
+pip install reportlab qrcode pillow
+python3 tools/generate_dossier.py
+```
+
+L'URL encodée dans le QR code est la constante `SITE_URL` en tête de `tools/generate_dossier.py`.
+Les polices utilisées (Playfair Display et Lato) sont sous licence SIL Open Font License, dans
+`tools/fonts/`.
