@@ -745,7 +745,7 @@ def page_site(c):
     lx, lw = M, 264
     y -= 26
     features = [
-        ("Une accueil qui donne envie", "Grands visuels, promesse claire, accès immédiat aux prestations et à l’appel."),
+        ("Un accueil qui donne envie", "Grands visuels, promesse claire, accès immédiat aux prestations et à l’appel."),
         ("Six prestations expliquées", "Un univers par carte : plats africains, européens, entrées, jus, mariages, anniversaires."),
         ("Une galerie filtrable", "Photos classées par catégorie ; agrandissement au toucher, légendes et compteurs."),
         ("Une page événements", "Un discours dédié aux mariages et anniversaires, avec appel à l’action."),
