@@ -432,7 +432,7 @@
           <button class="filter-button" type="button" data-filter="anniversaire" aria-pressed="false">Anniversaire <span class="filter-count">2</span></button>
           <button class="filter-button" type="button" data-filter="mariage" aria-pressed="false">Mariage <span class="filter-count">1</span></button>
         </div>
-        <div class="gallery-grid" aria-live="polite">
+        <div class="gallery-grid" id="gallery-grid" aria-live="polite">
           <article class="gallery-card" data-category="africain">
             <button class="gallery-trigger" type="button" data-title="Cuisine africaine — assiettes généreuses" aria-label="Agrandir la photo des plats africains">
               <img src="assets/plats-africains-assortiment.jpg" alt="Assortiment de plats généreux servis avec du riz, des légumes et des sauces" loading="lazy" decoding="async">
@@ -639,7 +639,7 @@
   <footer class="site-footer">
     <div class="footer-inner">
       <a class="footer-brand" href="#accueil"><span class="brand-mark" aria-hidden="true">KP</span><span>Kandys Pâtisserie</span></a>
-      <nav class="footer-nav" aria-label="Navigation de pied de page"><a href="#prestations">Prestations</a><a href="#realisations">Nos réalisations</a><a href="#evenements">Événements</a><a href="#commande">Commander</a><a href="#contact">Contact</a></nav>
+      <nav class="footer-nav" aria-label="Navigation de pied de page"><a href="#prestations">Prestations</a><a href="#realisations">Nos réalisations</a><a href="#evenements">Événements</a><a href="#commande">Commander</a><a href="#contact">Contact</a><a class="footer-admin-link" href="admin/">Espace équipe</a></nav>
       <p class="copyright">© <span id="year">2026</span> Kandys Pâtisserie · Daloa</p>
     </div>
     <div class="footer-credit">
@@ -684,30 +684,80 @@
       nav.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
       window.addEventListener('resize', () => { if (window.innerWidth > 760) closeMenu(); });
 
-      const filterButtons = document.querySelectorAll('.filter-button');
-      const galleryCards = document.querySelectorAll('.gallery-card');
-      filterButtons.forEach(button => {
+      let activeFilter = 'all';
+      const applyFilter = () => {
+        const buttons = document.querySelectorAll('.filter-button');
+        buttons.forEach(item => item.setAttribute('aria-pressed', String(item.dataset.filter === activeFilter)));
+        document.querySelectorAll('.gallery-card').forEach(card => {
+          card.hidden = activeFilter !== 'all' && card.dataset.category !== activeFilter;
+        });
+      };
+      document.querySelectorAll('.filter-button').forEach(button => {
         button.addEventListener('click', () => {
-          const filter = button.dataset.filter;
-          filterButtons.forEach(item => item.setAttribute('aria-pressed', String(item === button)));
-          galleryCards.forEach(card => {
-            card.hidden = filter !== 'all' && card.dataset.category !== filter;
-          });
+          activeFilter = button.dataset.filter;
+          applyFilter();
         });
       });
 
       const lightbox = document.querySelector('#lightbox');
       const lightboxImage = lightbox.querySelector('.lightbox-stage img');
       const lightboxCaption = lightbox.querySelector('.lightbox-caption');
-      document.querySelectorAll('.gallery-trigger').forEach(trigger => {
-        trigger.addEventListener('click', () => {
-          const image = trigger.querySelector('img');
-          lightboxImage.src = image.currentSrc || image.src;
-          lightboxImage.alt = image.alt;
-          lightboxCaption.textContent = trigger.dataset.title || image.alt;
-          lightbox.showModal();
+      const bindGalleryTriggers = () => {
+        document.querySelectorAll('.gallery-trigger').forEach(trigger => {
+          trigger.addEventListener('click', () => {
+            const image = trigger.querySelector('img');
+            lightboxImage.src = image.currentSrc || image.src;
+            lightboxImage.alt = image.alt;
+            lightboxCaption.textContent = trigger.dataset.title || image.alt;
+            lightbox.showModal();
+          });
         });
-      });
+      };
+      bindGalleryTriggers();
+
+      // Réalisations gérées depuis l'espace équipe : la galerie se met à jour sans redéploiement.
+      const CATEGORY_LABELS = {
+        africain: 'Cuisine africaine',
+        europeen: 'Cuisine européenne',
+        entrees: 'Entrées',
+        patisserie: 'Pâtisserie',
+        anniversaire: 'Anniversaire',
+        mariage: 'Mariage'
+      };
+      const renderGallery = items => {
+        const grid = document.querySelector('#gallery-grid');
+        if (!grid || !items.length) return;
+        grid.innerHTML = items.map(item => {
+          const title = String(item.title || '').replace(/\s+/g, ' ').trim();
+          const words = title.split(' ');
+          const breakAt = Math.ceil(words.length / 2);
+          const titleHtml = words.length > 2
+            ? `${words.slice(0, breakAt).join(' ')}<br>${words.slice(breakAt).join(' ')}`
+            : title;
+          const caption = item.caption || CATEGORY_LABELS[item.category] || '';
+          return `<article class="gallery-card" data-category="${item.category}">
+            <button class="gallery-trigger" type="button" data-title="${caption ? caption + ' — ' : ''}${title}" aria-label="Agrandir la photo : ${title}">
+              <img src="${item.image}" alt="${item.alt || title}" loading="lazy" decoding="async">
+              <span class="gallery-title">${titleHtml}</span>
+            </button>
+            <div class="gallery-caption"><span>${caption}</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v18M3 12h18"/></svg></div>
+          </article>`;
+        }).join('');
+        document.querySelectorAll('.filter-button').forEach(button => {
+          const count = button.querySelector('.filter-count');
+          if (!count) return;
+          const key = button.dataset.filter;
+          count.textContent = key === 'all'
+            ? items.length
+            : items.filter(item => item.category === key).length;
+        });
+        bindGalleryTriggers();
+        applyFilter();
+      };
+      fetch('/api/realisations', { headers: { Accept: 'application/json' } })
+        .then(response => (response.ok ? response.json() : null))
+        .then(data => { if (data && data.realisations) renderGallery(data.realisations); })
+        .catch(() => {});
       lightbox.querySelector('.lightbox-close').addEventListener('click', () => lightbox.close());
       lightbox.addEventListener('click', event => { if (event.target === lightbox) lightbox.close(); });
       document.addEventListener('keydown', event => {
@@ -732,6 +782,21 @@
         ].join('\\n');
         const whatsappNumber = String(values.get('destinataire') || '').replace(/\D/g, '');
         if (!whatsappNumber) return;
+
+        // Enregistrement de la commande pour l'espace équipe (le client valide ensuite dans WhatsApp).
+        fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          keepalive: true,
+          body: JSON.stringify({
+            nom: values.get('nom'),
+            prenoms: values.get('prenoms'),
+            telephone: values.get('telephone'),
+            localisation: values.get('localisation'),
+            type: values.get('type'),
+            description: values.get('description')
+          })
+        }).catch(() => {});
         const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
         orderFallback.href = whatsappUrl;
         orderFallback.hidden = false;

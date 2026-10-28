@@ -837,3 +837,12 @@ body {
 @media (max-width: 430px) {
   .footer-credit .credit-link { flex-wrap: wrap; justify-content: center; row-gap: 4px; font-size: 9px; }
 }
+
+/* Accès discret à l'espace équipe depuis le pied de page. */
+.footer-nav .footer-admin-link {
+  color: rgba(255, 249, 237, .45);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.footer-nav .footer-admin-link:hover { color: var(--gold-light); }
