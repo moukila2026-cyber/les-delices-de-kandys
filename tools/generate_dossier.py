@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Génère le dossier de présentation PDF du site Les Délices de Kandys.
+"""Génère le dossier de présentation PDF du site Kandys Pâtisserie.
 
 Usage :  python3 tools/generate_dossier.py
-Sortie :  dossier/les-delices-de-kandys-dossier.pdf
+Sortie :  dossier/kandys-patisserie-dossier.pdf
 
 Dépendances : reportlab, qrcode, pillow
 Polices     : Playfair Display + Lato (SIL Open Font License, cf. tools/fonts/)
@@ -27,11 +27,11 @@ from reportlab.platypus import Paragraph
 ROOT = Path(__file__).resolve().parent.parent
 ASSETS = ROOT / "assets"
 FONTS = ROOT / "tools" / "fonts"
-OUT = ROOT / "dossier" / "les-delices-de-kandys-dossier.pdf"
+OUT = ROOT / "dossier" / "kandys-patisserie-dossier.pdf"
 BUILD = Path("/tmp/dk-pdf-build")
 
-SITE_URL = "https://les-delices-de-kandys.vercel.app"
-SITE_LABEL = "les-delices-de-kandys.vercel.app"
+SITE_URL = "https://kandys-patisserie.vercel.app"
+SITE_LABEL = "kandys-patisserie.vercel.app"
 PHONE_1 = "+225 01 02 15 04 03"
 PHONE_2 = "+225 05 84 16 20 72"
 WHATSAPP = "+225 01 02 15 03 03"
@@ -218,7 +218,7 @@ def page_frame(c, number, dark=False, bg=CREAM):
     c.line(M, 44, W - M, 44)
     spaced(
         c,
-        "LES DÉLICES DE KANDYS  ·  DALOA",
+        "KANDYS PÂTISSERIE  ·  DALOA",
         M,
         31,
         "Lato-Bold",
@@ -308,7 +308,7 @@ def page_cover(c):
     c.circle(cx, cy, 22.5, stroke=1, fill=0)
     c.setFillColor(GOLD_LIGHT)
     c.setFont("Playfair-Medium", 16)
-    c.drawCentredString(cx, cy - 5.5, "DK")
+    c.drawCentredString(cx, cy - 5.5, "KP")
 
     spaced(
         c,
@@ -325,10 +325,10 @@ def page_cover(c):
     # titre
     c.setFillColor(PAPER)
     c.setFont("Playfair-Regular", 40)
-    c.drawCentredString(W / 2, H - 292, "Les Délices")
+    c.drawCentredString(W / 2, H - 292, "Kandys")
     c.setFillColor(GOLD_LIGHT)
     c.setFont("Playfair-MediumItalic", 44)
-    c.drawCentredString(W / 2, H - 343, "de Kandys")
+    c.drawCentredString(W / 2, H - 343, "Pâtisserie")
 
     gold_rule(c, W / 2, H - 370, 96, GOLD)
 
@@ -419,7 +419,7 @@ def page_presentation(c):
             ("Votre savoir-faire,", S["h1"]),
             ("<font color='#762444'>enfin visible en ligne.</font>", S["h1"]),
         ],
-        "Le site présente Les Délices de Kandys comme vous le faites en salle : avec "
+        "Le site présente Kandys Pâtisserie comme vous le faites en salle : avec "
         "générosité, soin et simplicité. Il rassemble vos prestations, vos réalisations "
         "et vos coordonnées, puis conduit chaque visiteur vers une commande WhatsApp.",
         width=455,
@@ -947,6 +947,11 @@ def page_qr(c):
     c.drawCentredString(cx + cw / 2, cy + 48, SITE_LABEL)
     gold_rule(c, cx + cw / 2, cy + 34, 46)
 
+    c.setFillColor(MUTED)
+    c.setFont("Lato", 6.8)
+    c.drawCentredString(cx + cw / 2, cy + 18,
+                        "Site conçu par Shopin30 · WhatsApp +225 05 01 30 33 43")
+
     # --- mode d'emploi
     rx = 330
     rw = W - M - rx
@@ -991,7 +996,7 @@ def page_qr(c):
     extra = [
         (
             "Un nom de domaine",
-            "Ex. lesdelicesdekandys.ci : plus simple à dicter à la radio, à imprimer et à "
+            "Ex. kandyspatisserie.ci : plus simple à dicter à la radio, à imprimer et à "
             "retenir pour vos clients.",
         ),
         (
@@ -1036,11 +1041,11 @@ def page_qr(c):
 def build():
     OUT.parent.mkdir(parents=True, exist_ok=True)
     c = canvas.Canvas(str(OUT), pagesize=A4)
-    c.setTitle("Les Délices de Kandys — Dossier de présentation du site web")
-    c.setAuthor("Les Délices de Kandys")
+    c.setTitle("Kandys Pâtisserie — Dossier de présentation du site web")
+    c.setAuthor("Kandys Pâtisserie")
     c.setSubject("Prestations, informations pratiques et accès au site web par QR code")
-    c.setKeywords("Les Délices de Kandys, Daloa, restaurant, pâtisserie, site web, QR code")
-    c.setCreator("Dossier généré pour la présentation au propriétaire")
+    c.setKeywords("Kandys Pâtisserie, Daloa, restaurant, pâtisserie, site web, QR code")
+    c.setCreator("Conçu par Shopin30 · +225 05 01 30 33 43")
 
     builders = [
         ("cover", page_cover, "Couverture"),

@@ -40,7 +40,7 @@ Remplacez l’URL par celle de votre dépôt. Puis, dans Vercel, importez ce dé
 
 ## Dossier de présentation (PDF)
 
-`dossier/les-delices-de-kandys-dossier.pdf` est le dossier remis au propriétaire : présentation
+`dossier/kandys-patisserie-dossier.pdf` est le dossier remis au propriétaire : présentation
 de l'établissement, prestations, réalisations, présentation du site et **code QR** qui ouvre
 directement le site.
 
@@ -51,6 +51,12 @@ pip install reportlab qrcode pillow
 python3 tools/generate_dossier.py
 ```
 
+Le site est publié sur **https://kandys-patisserie.vercel.app**.
 L'URL encodée dans le QR code est la constante `SITE_URL` en tête de `tools/generate_dossier.py`.
 Les polices utilisées (Playfair Display et Lato) sont sous licence SIL Open Font License, dans
 `tools/fonts/`.
+
+## Crédit & contact
+
+Pied de page : « Conçu par Shopin30 » avec un lien WhatsApp cliquable
+(+225 05 01 30 33 43) pour les personnes qui souhaitent commander un site internet.
