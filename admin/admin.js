@@ -11,7 +11,6 @@ const state = {
   agents: [],
   editing: null,
   imageData: null,
-  removeImage: false,
 };
 
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -71,9 +70,16 @@ function formatDate(value) {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString('fr-FR', {
-    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
-  });
+  const day = date.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+  const time = date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return `${day} à ${time}`;
+}
+
+function formatPickup(value) {
+  if (!value) return '';
+  const date = new Date(`${String(value).slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
 }
 
 function field(form, name) {
@@ -174,16 +180,19 @@ async function loadOrders() {
   const list = $('#orders-list');
   try {
     const params = new URLSearchParams();
-    const status = $('#orders-status').value;
+    const filter = $('#orders-status').value;
     const search = $('#orders-search').value.trim();
-    if (status) params.set('status', status);
+    if (filter === 'a_traiter') params.set('pending', '1');
+    else if (filter) params.set('status', filter);
     if (search) params.set('q', search);
     const data = await api(`/api/orders?${params.toString()}`);
     state.orders = data.orders;
-    const fresh = data.counts.nouvelle || 0;
+    const pending = (data.counts && data.counts.a_traiter) || 0;
     const badge = $('#tab-orders-badge');
-    badge.hidden = fresh === 0;
-    badge.textContent = fresh;
+    badge.hidden = pending === 0;
+    badge.textContent = pending;
+    badge.title = `${pending} commande(s) sans traitement enregistré`;
+    document.title = pending ? `(${pending}) Commandes · Kandys Pâtisserie` : 'Espace équipe · Kandys Pâtisserie';
     renderOrders(data.canDelete);
   } catch (error) {
     list.innerHTML = `<p class="empty">${escapeHtml(error.message)}</p>`;
@@ -206,8 +215,10 @@ function renderOrders(canDelete) {
         <span>📞 <a href="tel:${escapeHtml(order.telephone)}">${escapeHtml(order.telephone)}</a></span>
         <span>📍 ${escapeHtml(order.localisation || '—')}</span>
         <span>🎂 ${escapeHtml(order.type || '—')}</span>
-        <span>🕒 ${escapeHtml(formatDate(order.created_at))}</span>
+        ${order.parts ? `<span>🍰 ${escapeHtml(String(order.parts))} parts</span>` : ''}
+        <span>🕒 Reçue le ${escapeHtml(formatDate(order.created_at))}</span>
       </div>
+      ${order.pickup_date ? `<div class="order-meta"><span>🗓 Retrait souhaité : <strong>${escapeHtml(formatPickup(order.pickup_date))}</strong>${order.pickup_slot ? ` · ${escapeHtml(order.pickup_slot)}` : ''}</span></div>` : ''}
       <p class="order-desc">${escapeHtml(order.description)}</p>
       <div class="order-actions">
         <select data-action="status" aria-label="Statut de la commande">
@@ -219,7 +230,10 @@ function renderOrders(canDelete) {
         <a class="btn btn-ghost btn-sm" href="https://wa.me/${escapeHtml(String(order.telephone).replace(/\D/g, ''))}" target="_blank" rel="noopener noreferrer">WhatsApp</a>
         ${canDelete ? '<button class="btn btn-danger btn-sm" type="button" data-action="delete">Supprimer</button>' : ''}
       </div>
-      ${order.updated_by ? `<div class="order-meta"><span>Dernière action : ${escapeHtml(order.updated_by)} · ${escapeHtml(formatDate(order.updated_at))}</span></div>` : ''}
+      ${order.handled_at
+        ? `<div class="order-handled" title="${escapeHtml(order.handled_by || '')}"><span><strong>Traitée par ${escapeHtml(order.handled_by_name || order.handled_by || 'un agent')}</strong> <em>(${escapeHtml(order.handled_by_role === 'admin' ? 'administrateur' : 'agent')} · ${escapeHtml(order.handled_by || '')})</em> — le ${escapeHtml(formatDate(order.handled_at))}</span></div>`
+        : '<div class="order-handled is-pending"><span>Aucun traitement enregistré : le prochain changement de statut indiquera qui l’a traité et à quelle heure.</span></div>'}
+      ${(order.events || []).length ? `<details class="order-history"><summary>Historique du traitement (${order.events.length})</summary><ol>${order.events.map((event) => `<li><strong>${escapeHtml(STATUS_LABELS[event.to_status] || event.to_status || 'Reçue')}</strong>${event.from_status ? ` (depuis ${escapeHtml(STATUS_LABELS[event.from_status] || event.from_status)})` : ''} · ${escapeHtml(event.actor_name || 'Site web')}${event.actor_role && event.actor_role !== 'public' ? ` (${escapeHtml(event.actor_role)})` : ''} · ${escapeHtml(formatDate(event.created_at))}${event.note ? ` · ${escapeHtml(event.note)}` : ''}</li>`).join('')}</ol></details>` : ''}
     </article>
   `).join('');
 }
@@ -259,6 +273,19 @@ $('#orders-list').addEventListener('click', async (event) => {
 });
 
 $('#orders-refresh').addEventListener('click', loadOrders);
+
+// Suivi à distance : rafraîchit la liste et le compteur chaque minute.
+setInterval(() => {
+  if (!state.user) return;
+  if (document.hidden) return;
+  const commandesTab = $('.tab[data-tab="commandes"]');
+  if (commandesTab && commandesTab.classList.contains('is-active')) loadOrders();
+}, 60000);
+document.addEventListener('visibilitychange', () => {
+  if (!state.user || document.hidden) return;
+  const commandesTab = $('.tab[data-tab="commandes"]');
+  if (commandesTab && commandesTab.classList.contains('is-active')) loadOrders();
+});
 $('#orders-status').addEventListener('change', loadOrders);
 let searchTimer;
 $('#orders-search').addEventListener('input', () => {
@@ -533,6 +560,8 @@ async function loadLogs() {
       <div class="stat"><span>Base de données</span><strong style="font-size:15px">${mode}</strong></div>
       <div class="stat"><span>Commandes</span><strong>${stats.orders_total || 0}</strong></div>
       <div class="stat"><span>Nouvelles</span><strong>${(stats.orders_by_status || {}).nouvelle || 0}</strong></div>
+      <div class="stat"><span>À traiter</span><strong>${stats.orders_pending || 0}</strong></div>
+      <div class="stat"><span>Traitées</span><strong>${stats.orders_handled || 0}</strong></div>
       <div class="stat"><span>Aujourd’hui</span><strong>${stats.orders_today || 0}</strong></div>
       <div class="stat"><span>Réalisations</span><strong>${stats.realisations || 0}</strong></div>
       <div class="stat"><span>Agents actifs</span><strong>${stats.agents_active || 0}</strong></div>

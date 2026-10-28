@@ -18,6 +18,19 @@ Le formulaire prépare un message avec les champs saisis et l’ouvre dans le Wh
 restaurant (+225 01 02 15 03 03) ; le client confirme l’envoi. En parallèle, la demande est
 enregistrée via `POST /api/orders` pour apparaître dans **l’espace équipe** (base Neon).
 
+Depuis la mise en place du click & collect, le client choisit aussi une **date de retrait**
+(48 h de préparation minimum, contrôlé côté navigateur et côté API) et un **créneau**
+(matin, midi, après-midi, soir), ainsi qu’un **nombre de parts** pour les gâteaux. Un champ
+piège invisible bloque les robots spammeurs.
+
+## Référencement local
+
+`index.html` contient les balises Open Graph, la carte `application/ld+json`
+(`Restaurant` + `Bakery`, adresse Daloa, téléphone, `acceptsReservations`) et une URL
+canonique. `robots.txt` exclut `/admin` et `/api`, `sitemap.xml` déclare la page d’accueil.
+Horaires d’ouverture : à renseigner dans la fiche Google Business Profile et dans le
+JSON-LD (`openingHours`) dès qu’ils sont confirmés — non inventés sur le site.
+
 ## Espace équipe (dashboard)
 
 Adresse : `/admin/` (lien discret « Espace équipe » dans le pied de page du site).
@@ -31,6 +44,12 @@ Adresse : `/admin/` (lien discret « Espace équipe » dans le pied de page du s
   signée en cookie `HttpOnly` (8 h), limitation des tentatives de connexion.
 - Chaque action est tracée dans le journal (qui, quoi, quand), consultable par
   l’administrateur même à distance.
+- **Traçabilité des commandes** : lorsqu’un agent ou l’administrateur change le statut,
+  l’API enregistre `handled_by` (e-mail), `handled_by_name`, `handled_by_role` et
+  `handled_at` (horodatage), et ajoute une ligne dans `order_events`. Le dashboard affiche
+  « Traitée par … le JJ/MM/AAAA à HH:MM », un historique dépliable, et un filtre
+  « À traiter ». La liste se rafraîchit chaque minute et le titre de l’onglet affiche le
+  nombre de commandes sans traitement.
 
 ### Configuration
 
@@ -45,8 +64,10 @@ Variables d’environnement (Vercel → Settings → Environment Variables) :
 
 Sans base connectée, les données sont écrites dans un fichier temporaire : pratique en local,
 non durable en production. Le dashboard affiche alors un avertissement.
-Le schéma (`users`, `orders`, `realisations`, `logs`) est créé automatiquement au premier
-appel, et les 14 réalisations existantes sont insérées si la table est vide.
+Le schéma (`users`, `orders`, `order_events`, `realisations`, `logs`) est créé
+automatiquement au premier appel, et les 14 réalisations existantes sont insérées si la
+table est vide. Les colonnes de suivi ajoutées après coup (`pickup_date`, `pickup_slot`,
+`parts`, `handled_*`) sont migrées automatiquement sur une base existante.
 
 ### Développement local
 

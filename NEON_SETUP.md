@@ -76,3 +76,12 @@ Les 14 réalisations actuelles sont insérées automatiquement au premier démar
 - **Sauvegardes** : Neon conserve un historique de restauration (branches / point-in-time)
   inclus dans le plan gratuit.
 - **Coût** : 0 € pour ce volume d’utilisation.
+
+## Mise à jour du schéma (suivi des commandes)
+
+Au premier appel de l’API, `api/_lib/db.js` crée les tables manquantes puis applique les
+migrations `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` (colonnes `pickup_date`,
+`pickup_slot`, `parts`, `handled_by`, `handled_by_name`, `handled_by_role`, `handled_at`).
+La table `order_events` conserve l’historique : ancien statut, nouveau statut, agent
+(e-mail, nom, rôle), note et horodatage. Aucune intervention manuelle n’est nécessaire sur
+une base existante.

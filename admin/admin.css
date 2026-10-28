@@ -146,6 +146,16 @@ label input, label select, label textarea { margin-top: 6px; text-transform: non
 .order-actions select { width: 165px; }
 .order-actions input { flex: 1 1 260px; }
 .order-card.is-new { border-color: rgba(197, 161, 90, .7); box-shadow: 0 0 0 3px rgba(197, 161, 90, .12); }
+.order-handled { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 9px; background: rgba(111, 125, 92, .13); color: #3f4d2e; font-size: 12px; }
+.order-handled::before { content: ''; width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #6f7d5c; }
+.order-handled.is-pending { background: rgba(197, 161, 90, .16); color: #6b5327; }
+.order-handled.is-pending::before { background: #c5a15a; }
+.order-handled strong { font-weight: 800; }
+.order-handled em { font-style: normal; opacity: .72; }
+.order-history { color: var(--muted); font-size: 12px; }
+.order-history summary { cursor: pointer; color: var(--wine); font-weight: 800; }
+.order-history ol { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+.order-history li::marker { color: var(--gold); }
 
 /* réalisations */
 .realisations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(215px, 1fr)); gap: 16px; }

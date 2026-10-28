@@ -25,9 +25,30 @@ create table if not exists orders (
   status       text not null default 'nouvelle'
                check (status in ('nouvelle', 'en_cours', 'prete', 'livree', 'annulee')),
   note         text default '',
+  pickup_date  date,
+  pickup_slot  text default '',
+  parts        integer,
+  handled_by       text default '',
+  handled_by_name  text default '',
+  handled_by_role  text default '',
+  handled_at       timestamptz,
   created_at   timestamptz not null default now(),
   updated_at   timestamptz,
   updated_by   text default ''
+);
+
+-- Historique de traitement : qui a fait avancer la commande, quand, et vers quel statut.
+create table if not exists order_events (
+  id          text primary key,
+  order_id    text not null,
+  actor_id    text default '',
+  actor_email text default '',
+  actor_name  text default '',
+  actor_role  text default '',
+  from_status text default '',
+  to_status   text default '',
+  note        text default '',
+  created_at  timestamptz not null default now()
 );
 
 create table if not exists realisations (
@@ -56,5 +77,7 @@ create table if not exists logs (
 
 create index if not exists orders_created_at_idx on orders (created_at desc);
 create index if not exists orders_status_idx on orders (status);
+create index if not exists order_events_order_idx on order_events (order_id, created_at desc);
+create index if not exists orders_handled_at_idx on orders (handled_at);
 create index if not exists realisations_position_idx on realisations (position);
 create index if not exists logs_created_at_idx on logs (created_at desc);

@@ -715,6 +715,10 @@ body {
 }
 .order-card-stamp svg { width: 23px; height: 23px; }
 .order-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 15px 13px; }
+.order-honeypot { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.order-delay { display: grid; gap: 5px; margin: 0 0 22px; padding: 12px 15px; border-left: 2px solid var(--gold); border-radius: 4px; background: rgba(197, 161, 90, .1); }
+.order-delay strong { color: var(--wine-dark); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.order-delay span { color: var(--muted); font-size: 10px; line-height: 1.6; }
 .order-field { min-width: 0; display: flex; flex-direction: column; gap: 7px; }
 .order-field-wide { grid-column: 1 / -1; }
 .order-field label { color: #49353a; font-size: 10px; font-weight: 800; letter-spacing: .045em; }
