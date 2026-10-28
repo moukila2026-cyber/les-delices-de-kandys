@@ -10,6 +10,19 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
+/* Mode test : base PostgreSQL en mémoire (pg-mem), utile sans instance Neon.
+   Le schéma est créé par api/_lib/db.js au premier appel, comme en production. */
+if (process.env.KANDYS_TEST_PG_MEM) {
+  const { newDb } = require(process.env.KANDYS_TEST_PG_MEM);
+  const memory = newDb({ autoCreateForeignKeyIndices: true });
+  const { Client } = memory.adapters.createPg();
+  const client = new Client();
+  client.connect().then(() => {
+    require('../api/_lib/db').__setRunnerForTests(async (text, params) => (await client.query(text, params)).rows);
+    console.log('Base de test en mémoire (pg-mem) connectée');
+  }).catch((error) => console.error('pg-mem indisponible', error));
+}
+
 const ROOT = path.resolve(__dirname, '..');
 const PORT = Number(process.argv[2] || process.env.PORT || 8080);
 

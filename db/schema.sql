@@ -1,5 +1,6 @@
--- Kandys Pâtisserie — schéma de base pour l'espace équipe (Supabase / PostgreSQL)
--- À exécuter dans Supabase : SQL Editor → New query → coller → Run.
+-- Kandys Pâtisserie — base Neon (PostgreSQL)
+-- Ce fichier est identique au schéma appliqué automatiquement par l'API
+-- (voir api/_lib/schema.js). Utile pour créer la base à la main avec psql.
 
 create table if not exists users (
   id            text primary key,
@@ -57,10 +58,3 @@ create index if not exists orders_created_at_idx on orders (created_at desc);
 create index if not exists orders_status_idx on orders (status);
 create index if not exists realisations_position_idx on realisations (position);
 create index if not exists logs_created_at_idx on logs (created_at desc);
-
--- Sécurité : accès uniquement via la clé « service_role » utilisée par les
--- fonctions serverless (/api). Aucun accès anonyme.
-alter table users        enable row level security;
-alter table orders       enable row level security;
-alter table realisations enable row level security;
-alter table logs         enable row level security;

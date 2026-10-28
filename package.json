@@ -1,0 +1,13 @@
+{
+  "name": "kandys-patisserie",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site vitrine Kandys Pâtisserie et espace équipe (dashboard commandes, réalisations, agents).",
+  "engines": { "node": ">=18" },
+  "scripts": {
+    "dev": "node tools/dev-server.js 8080"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4"
+  }
+}

@@ -16,7 +16,7 @@ Puis ouvrir `http://localhost:8080`.
 
 Le formulaire prépare un message avec les champs saisis et l’ouvre dans le WhatsApp du
 restaurant (+225 01 02 15 03 03) ; le client confirme l’envoi. En parallèle, la demande est
-enregistrée via `POST /api/orders` pour apparaître dans **l’espace équipe**.
+enregistrée via `POST /api/orders` pour apparaître dans **l’espace équipe** (base Neon).
 
 ## Espace équipe (dashboard)
 
@@ -41,15 +41,26 @@ Variables d’environnement (Vercel → Settings → Environment Variables) :
 | `ADMIN_EMAIL` | e-mail du compte administrateur |
 | `ADMIN_PASSWORD_HASH` | empreinte scrypt du mot de passe administrateur (ou `ADMIN_PASSWORD` en clair pour un test) |
 | `SESSION_SECRET` | clé de signature des sessions (chaîne aléatoire longue) |
-| `SUPABASE_URL` | base de données (voir [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)) |
-| `SUPABASE_SERVICE_ROLE_KEY` | clé serveur Supabase |
+| `DATABASE_URL` | chaîne de connexion **Neon** (voir [`NEON_SETUP.md`](NEON_SETUP.md)) |
 
-Sans Supabase, les données sont écrites dans un fichier temporaire : pratique en local,
+Sans base connectée, les données sont écrites dans un fichier temporaire : pratique en local,
 non durable en production. Le dashboard affiche alors un avertissement.
+Le schéma (`users`, `orders`, `realisations`, `logs`) est créé automatiquement au premier
+appel, et les 14 réalisations existantes sont insérées si la table est vide.
 
 ### Développement local
 
 ```bash
+ADMIN_EMAIL=admin@kandys.ci ADMIN_PASSWORD='MotDePasseTest!' \
+SESSION_SECRET=secret-local node tools/dev-server.js 8080
+```
+
+Pour travailler sur le code PostgreSQL **sans** instance Neon, le serveur peut utiliser une
+base en mémoire (pg-mem, installé séparément) :
+
+```bash
+npm install --no-save pg-mem
+KANDYS_FORCE_PG=1 KANDYS_TEST_PG_MEM="$(pwd)/node_modules/pg-mem" \
 ADMIN_EMAIL=admin@kandys.ci ADMIN_PASSWORD='MotDePasseTest!' \
 SESSION_SECRET=secret-local node tools/dev-server.js 8080
 ```
@@ -73,7 +84,7 @@ git remote add origin https://github.com/VOTRE-COMPTE/VOTRE-DEPOT.git
 git push -u origin main
 ```
 
-Remplacez l’URL par celle de votre dépôt. Puis, dans Vercel, importez ce dépôt et choisissez le préréglage **Other** ; laissez les commandes de build et d’installation vides et définissez le dossier de sortie sur `.` (racine du dépôt). Déployez : aucune variable d’environnement ni configuration Supabase n’est nécessaire.
+Remplacez l’URL par celle de votre dépôt. Puis, dans Vercel, importez ce dépôt et choisissez le préréglage **Other** ; laissez les commandes de build et d’installation vides et définissez le dossier de sortie sur `.` (racine du dépôt). Déployez : le site statique ne demande aucune configuration ; l’espace équipe a besoin de `DATABASE_URL` (voir [`NEON_SETUP.md`](NEON_SETUP.md)).
 
 ## Coordonnées affichées
 

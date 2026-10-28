@@ -528,7 +528,9 @@ async function loadLogs() {
   try {
     const data = await api('/api/logs?limit=120');
     const stats = data.stats || {};
+    const mode = (data.storage && data.storage.mode) === 'neon' ? 'Neon (durable)' : 'temporaire';
     $('#stats').innerHTML = `
+      <div class="stat"><span>Base de données</span><strong style="font-size:15px">${mode}</strong></div>
       <div class="stat"><span>Commandes</span><strong>${stats.orders_total || 0}</strong></div>
       <div class="stat"><span>Nouvelles</span><strong>${(stats.orders_by_status || {}).nouvelle || 0}</strong></div>
       <div class="stat"><span>Aujourd’hui</span><strong>${stats.orders_today || 0}</strong></div>
