@@ -85,8 +85,10 @@ function ensureSchema() {
       for (const statement of MIGRATIONS) {
         try {
           await run(statement);
-        } catch {
-          /* colonne déjà présente ou moteur sans ALTER ... IF NOT EXISTS */
+        } catch (error) {
+          // Colonne déjà présente ou moteur sans ALTER ... IF NOT EXISTS : on journalise
+          // sans bloquer, mais l'erreur reste visible dans les logs d'exécution.
+          console.warn('Migration ignorée :', statement, '—', error.message);
         }
       }
       const [{ total }] = await run('select count(*)::int as total from realisations');
@@ -251,6 +253,28 @@ const db = {
     await ensureSchema();
     await run(`delete from ${table} where id = $1`, [id]);
     return true;
+  },
+
+  /**
+   * Diagnostic (endpoint /api/health) : vérifie que les colonnes de suivi et la
+   * table d'historique existent réellement, sans exposer la moindre donnée.
+   */
+  async schemaInfo() {
+    if (!usePostgres) return { orders_tracking: true, order_events: true };
+    await ensureSchema();
+    try {
+      const rows = await run(`select table_name, column_name from information_schema.columns
+        where table_name in ('orders', 'order_events')`);
+      const has = (table, column) =>
+        rows.some((row) => row.table_name === table && row.column_name === column);
+      return {
+        orders_tracking: ['pickup_date', 'pickup_slot', 'parts', 'handled_by', 'handled_at']
+          .every((column) => has('orders', column)),
+        order_events: has('order_events', 'order_id'),
+      };
+    } catch (error) {
+      return { orders_tracking: null, order_events: null, error: String(error.message || error) };
+    }
   },
 
   /** Réservé aux tests : remplace le pilote SQL par un moteur en mémoire. */

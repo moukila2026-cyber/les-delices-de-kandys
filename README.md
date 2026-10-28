@@ -44,6 +44,8 @@ Adresse : `/admin/` (lien discret « Espace équipe » dans le pied de page du s
   signée en cookie `HttpOnly` (8 h), limitation des tentatives de connexion.
 - Chaque action est tracée dans le journal (qui, quoi, quand), consultable par
   l’administrateur même à distance.
+- Diagnostic : `GET /api/health` renvoie le mode de stockage et la présence effective des
+  colonnes de suivi et de la table `order_events` (aucune donnée personnelle).
 - **Traçabilité des commandes** : lorsqu’un agent ou l’administrateur change le statut,
   l’API enregistre `handled_by` (e-mail), `handled_by_name`, `handled_by_role` et
   `handled_at` (horodatage), et ajoute une ligne dans `order_events`. Le dashboard affiche
