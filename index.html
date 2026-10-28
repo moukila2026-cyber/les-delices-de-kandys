@@ -4,8 +4,37 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#fbf8f0">
-  <meta name="description" content="Kandys Pâtisserie, restaurant et pâtisserie à Daloa : plats africains, plats européens, entrées, jus et gâteaux de fête. Passez commande directement sur WhatsApp.">
+  <meta name="description" content="Kandys Pâtisserie, restaurant et pâtisserie à Daloa : plats africains, plats européens, entrées, jus et gâteaux de fête. Commandez sur WhatsApp, retrait sur créneau au bout de 48 h.">
   <title>Kandys Pâtisserie — Restaurant & pâtisserie à Daloa</title>
+  <link rel="canonical" href="https://kandys-patisserie.vercel.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Kandys Pâtisserie">
+  <meta property="og:locale" content="fr_CI">
+  <meta property="og:title" content="Kandys Pâtisserie — Restaurant & pâtisserie à Daloa">
+  <meta property="og:description" content="Cuisine africaine et européenne, entrées, jus et gâteaux de fête à Daloa. Commandez sur WhatsApp avec un créneau de retrait.">
+  <meta property="og:url" content="https://kandys-patisserie.vercel.app/">
+  <meta property="og:image" content="https://kandys-patisserie.vercel.app/assets/plats-africains-assortiment.jpg">
+  <meta property="og:image:alt" content="Assortiment de plats africains servis chez Kandys Pâtisserie">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Kandys Pâtisserie — Restaurant & pâtisserie à Daloa">
+  <meta name="twitter:description" content="Cuisine africaine et européenne, entrées, jus et gâteaux de fête à Daloa. Commandez sur WhatsApp.">
+  <meta name="twitter:image" content="https://kandys-patisserie.vercel.app/assets/plats-africains-assortiment.jpg">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": ["Restaurant", "Bakery"],
+      "name": "Kandys Pâtisserie",
+      "description": "Restaurant et pâtisserie à Daloa : cuisine africaine et européenne, entrées, jus, gâteaux d’anniversaire et de mariage.",
+      "url": "https://kandys-patisserie.vercel.app/",
+      "image": "https://kandys-patisserie.vercel.app/assets/plats-africains-assortiment.jpg",
+      "telephone": "+2250102150403",
+      "servesCuisine": ["Africaine", "Européenne", "Pâtisserie"],
+      "address": { "@type": "PostalAddress", "addressLocality": "Daloa", "addressCountry": "CI" },
+      "areaServed": { "@type": "City", "name": "Daloa" },
+      "priceRange": "$$",
+      "acceptsReservations": "https://wa.me/2250102150303"
+    }
+  </script>
   <style>
     :root {
       --wine: #570d2b;
@@ -572,9 +601,13 @@
             <div class="order-step"><span>02</span><p><strong>Votre envie</strong><small>Choisissez la catégorie et décrivez-la.</small></p></div>
             <div class="order-step"><span>03</span><p><strong>WhatsApp s’ouvre</strong><small>Vérifiez le message puis confirmez l’envoi.</small></p></div>
           </div>
+          <div class="order-delay">
+            <strong>Délai & retrait</strong>
+            <span>Comptez 48 h minimum entre la demande et le retrait. Les pièces de mariage ou de grande taille demandent un délai plus long : précisez-le dans votre message. Le créneau est confirmé avec vous sur WhatsApp.</span>
+          </div>
           <div class="order-privacy">
             <span class="order-privacy-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 19 6v5c0 4.8-3 8-7 10-4-2-7-5.2-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
-            <span><strong>Vos informations ne sont pas stockées sur le site.</strong><small>Les informations sont transmises dans le brouillon WhatsApp que vous choisissez d’envoyer.</small></span>
+            <span><strong>Vos informations servent uniquement à traiter votre commande.</strong><small>Elles sont enregistrées dans l’espace équipe du restaurant pour le suivi, et transmises dans le brouillon WhatsApp que vous choisissez d’envoyer. Elles ne sont ni revendues ni utilisées à d’autres fins.</small></span>
           </div>
         </div>
 
@@ -590,8 +623,12 @@
               <div class="order-field"><label for="order-telephone">Numéro de téléphone <span aria-hidden="true">*</span></label><input id="order-telephone" name="telephone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+225 07 00 00 00 00" required></div>
               <div class="order-field"><label for="order-localisation">Localisation <span aria-hidden="true">*</span></label><input id="order-localisation" name="localisation" type="text" autocomplete="street-address" placeholder="Quartier, repère, ville" required></div>
               <div class="order-field"><label for="order-type">Type de commande <span aria-hidden="true">*</span></label><select id="order-type" name="type" required><option value="" selected disabled>Choisissez une catégorie</option><option>Gâteaux</option><option>Gâteau d’anniversaire</option><option>Gâteau de mariage</option><option>Plats africains</option><option>Plats européens</option><option>Entrées</option><option>Jus</option><option>Autre demande</option></select></div>
-              <div class="order-field"><label for="order-destinataire">WhatsApp du restaurant</label><input id="order-destinataire" name="destinataire" type="text" value="+225 01 02 15 03 03" readonly aria-readonly="true" autocomplete="off"></div>
-              <div class="order-field order-field-wide"><label for="order-description">Description de la commande <span aria-hidden="true">*</span></label><textarea id="order-description" name="description" rows="4" maxlength="1200" placeholder="Quantité, date souhaitée, saveurs ou détails utiles…" required></textarea><small class="field-hint">Plus vous donnez de détails, plus il sera facile de vous répondre.</small></div>
+              <div class="order-field"><label for="order-pickup-date">Date de retrait souhaitée <span aria-hidden="true">*</span></label><input id="order-pickup-date" name="pickup_date" type="date" required><small class="field-hint">48 h de préparation minimum.</small></div>
+              <div class="order-field"><label for="order-pickup-slot">Créneau de retrait <span aria-hidden="true">*</span></label><select id="order-pickup-slot" name="pickup_slot" required><option value="" selected disabled>Choisissez un créneau</option><option value="Matin (8h – 11h)">Matin (8h – 11h)</option><option value="Midi (12h – 14h)">Midi (12h – 14h)</option><option value="Après-midi (15h – 17h)">Après-midi (15h – 17h)</option><option value="Soir (18h – 20h)">Soir (18h – 20h)</option></select></div>
+              <div class="order-field"><label for="order-parts">Nombre de parts <small>(gâteaux)</small></label><input id="order-parts" name="parts" type="number" inputmode="numeric" min="1" max="500" placeholder="Ex. 12" autocomplete="off"></div>
+              <input id="order-destinataire" name="destinataire" type="hidden" value="+225 01 02 15 03 03">
+              <div class="order-field order-field-wide"><label for="order-description">Description de la commande <span aria-hidden="true">*</span></label><textarea id="order-description" name="description" rows="4" maxlength="1200" placeholder="Parfums, allergies, inscription sur le gâteau, détails utiles…" required></textarea><small class="field-hint">Plus vous donnez de détails, plus il sera facile de vous répondre.</small></div>
+              <div class="order-field order-field-wide order-honeypot" aria-hidden="true"><label for="order-entreprise">Entreprise</label><input id="order-entreprise" name="entreprise" type="text" tabindex="-1" autocomplete="off"></div>
             </div>
             <p class="order-whatsapp-note">WhatsApp s’ouvrira avec votre message prérempli. L’envoi ne sera effectué qu’après votre confirmation dans l’application.</p>
             <button class="button button-primary order-submit" type="submit">Préparer ma commande sur WhatsApp
@@ -660,7 +697,7 @@
     <button class="lightbox-close" type="button" aria-label="Fermer l’aperçu">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
     </button>
-    <div class="lightbox-stage"><img alt=""></div>
+    <div class="lightbox-stage"><img alt="Aperçu de la réalisation Kandys Pâtisserie"></div>
     <p class="lightbox-caption"></p>
   </dialog>
 
@@ -668,11 +705,20 @@
     (() => {
       const menuButton = document.querySelector('.menu-toggle');
       const nav = document.querySelector('#navigation');
+      const mobileViewport = typeof window.matchMedia === 'function'
+        ? window.matchMedia('(max-width: 760px)')
+        : { matches: window.innerWidth <= 760 };
+      // Menu fermé sur mobile : les liens ne doivent pas être atteignables au clavier.
+      const syncNavState = () => {
+        if (mobileViewport.matches && !nav.classList.contains('is-open')) nav.setAttribute('inert', '');
+        else nav.removeAttribute('inert');
+      };
       const closeMenu = () => {
         nav.classList.remove('is-open');
         menuButton.setAttribute('aria-expanded', 'false');
         menuButton.setAttribute('aria-label', 'Ouvrir le menu');
         document.body.classList.remove('menu-open');
+        syncNavState();
       };
       menuButton.addEventListener('click', () => {
         const isOpen = menuButton.getAttribute('aria-expanded') === 'true';
@@ -680,9 +726,11 @@
         menuButton.setAttribute('aria-label', isOpen ? 'Ouvrir le menu' : 'Fermer le menu');
         nav.classList.toggle('is-open', !isOpen);
         document.body.classList.toggle('menu-open', !isOpen);
+        syncNavState();
       });
       nav.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
-      window.addEventListener('resize', () => { if (window.innerWidth > 760) closeMenu(); });
+      window.addEventListener('resize', () => { if (!mobileViewport.matches) closeMenu(); else syncNavState(); });
+      syncNavState();
 
       let activeFilter = 'all';
       const applyFilter = () => {
@@ -758,30 +806,67 @@
         .then(response => (response.ok ? response.json() : null))
         .then(data => { if (data && data.realisations) renderGallery(data.realisations); })
         .catch(() => {});
+      let lastGalleryTrigger = null;
       lightbox.querySelector('.lightbox-close').addEventListener('click', () => lightbox.close());
       lightbox.addEventListener('click', event => { if (event.target === lightbox) lightbox.close(); });
+      // Retour du focus sur la vignette d'origine après fermeture.
+      lightbox.addEventListener('close', () => {
+        if (lastGalleryTrigger && document.contains(lastGalleryTrigger)) lastGalleryTrigger.focus();
+        lastGalleryTrigger = null;
+      });
+      document.addEventListener('click', event => {
+        const trigger = event.target.closest('.gallery-trigger');
+        if (trigger) lastGalleryTrigger = trigger;
+      }, true);
       document.addEventListener('keydown', event => {
         if (event.key === 'Escape' && nav.classList.contains('is-open')) closeMenu();
       });
       const orderForm = document.querySelector('#order-form');
       const orderStatus = document.querySelector('#order-status');
       const orderFallback = document.querySelector('#order-fallback');
+      const submitButton = orderForm.querySelector('.order-submit');
+      const pickupDateField = orderForm.elements.namedItem('pickup_date');
+      const pad = value => String(value).padStart(2, '0');
+      const addDays = days => {
+        const date = new Date();
+        date.setHours(12, 0, 0, 0);
+        date.setDate(date.getDate() + days);
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+      };
+      // 48 h de préparation minimum avant le retrait.
+      pickupDateField.min = addDays(2);
+      const formatPickupDate = value => {
+        if (!value) return '';
+        const date = new Date(`${value}T12:00:00`);
+        if (Number.isNaN(date.getTime())) return value;
+        return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+      };
       orderForm.addEventListener('submit', event => {
         event.preventDefault();
         if (!orderForm.reportValidity()) return;
+        if (orderForm.dataset.sending === 'true') return;
         const values = new FormData(orderForm);
-        const message = [
-          'Bonjour Kandys Pâtisserie, je souhaite passer une commande.',
-          '',
+        if (String(values.get('entreprise') || '').trim()) return; // piège anti-robots
+        const pickupDate = values.get('pickup_date');
+        const pickupSlot = values.get('pickup_slot');
+        const parts = String(values.get('parts') || '').trim();
+        const details = [
           `Nom : ${values.get('nom')}`,
           `Prénoms : ${values.get('prenoms')}`,
           `Téléphone : ${values.get('telephone')}`,
           `Localisation : ${values.get('localisation')}`,
           `Type de commande : ${values.get('type')}`,
-          `Description : ${values.get('description')}`
-        ].join('\\n');
+          `Retrait souhaité : ${formatPickupDate(pickupDate)} · ${pickupSlot}`,
+        ];
+        if (parts) details.push(`Nombre de parts : ${parts}`);
+        details.push(`Description : ${values.get('description')}`);
+        const message = ['Bonjour Kandys Pâtisserie, je souhaite passer une commande.', '', ...details].join('\n');
         const whatsappNumber = String(values.get('destinataire') || '').replace(/\D/g, '');
         if (!whatsappNumber) return;
+
+        orderForm.dataset.sending = 'true';
+        submitButton.disabled = true;
+        setTimeout(() => { orderForm.dataset.sending = 'false'; submitButton.disabled = false; }, 5000);
 
         // Enregistrement de la commande pour l'espace équipe (le client valide ensuite dans WhatsApp).
         fetch('/api/orders', {
@@ -794,17 +879,23 @@
             telephone: values.get('telephone'),
             localisation: values.get('localisation'),
             type: values.get('type'),
-            description: values.get('description')
+            description: values.get('description'),
+            pickup_date: pickupDate,
+            pickup_slot: pickupSlot,
+            parts: parts || null
           })
+        }).then(response => {
+          if (response.ok) return;
+          orderStatus.textContent += ' La commande n’a pas pu être enregistrée sur le site : envoyez bien le message WhatsApp.';
         }).catch(() => {});
         const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
         orderFallback.href = whatsappUrl;
         orderFallback.hidden = false;
         orderStatus.hidden = false;
+        orderStatus.textContent = `Retrait souhaité le ${formatPickupDate(pickupDate)} (${pickupSlot}). Votre demande est prête dans WhatsApp : vérifiez les informations puis appuyez sur Envoyer.`;
         const whatsappWindow = window.open(whatsappUrl, '_blank');
         if (whatsappWindow) {
           whatsappWindow.opener = null;
-          orderStatus.textContent = 'Votre demande est prête dans WhatsApp. Vérifiez les informations puis appuyez sur Envoyer.';
         } else {
           orderStatus.textContent = 'WhatsApp ne s’est pas ouvert automatiquement. Utilisez le lien ci-dessous pour ouvrir votre message.';
         }

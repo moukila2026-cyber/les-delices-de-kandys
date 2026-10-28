@@ -11,14 +11,17 @@
 const fs = require('fs');
 const path = require('path');
 const seed = require('./seed');
-const { STATEMENTS } = require('./schema');
+const { STATEMENTS, MIGRATIONS } = require('./schema');
 
 const LOCAL_DB = process.env.KANDYS_DB_PATH || path.join('/tmp', 'kandys-db.json');
 
 const COLUMNS = {
   users: ['id', 'email', 'name', 'role', 'active', 'password_hash', 'created_at', 'updated_at', 'last_login'],
   orders: ['id', 'nom', 'prenoms', 'telephone', 'localisation', 'type', 'description', 'status', 'note',
+    'pickup_date', 'pickup_slot', 'parts', 'handled_by', 'handled_by_name', 'handled_by_role', 'handled_at',
     'created_at', 'updated_at', 'updated_by'],
+  order_events: ['id', 'order_id', 'actor_id', 'actor_email', 'actor_name', 'actor_role',
+    'from_status', 'to_status', 'note', 'created_at'],
   realisations: ['id', 'category', 'title', 'caption', 'alt', 'image', 'position', 'visible',
     'created_at', 'updated_at'],
   logs: ['id', 'actor_id', 'actor_email', 'actor_role', 'action', 'target', 'details', 'created_at'],
@@ -78,6 +81,14 @@ function ensureSchema() {
       for (const statement of STATEMENTS) {
         await run(statement);
       }
+      // Colonnes de suivi ajoutées aux bases existantes : on ignore celles déjà présentes.
+      for (const statement of MIGRATIONS) {
+        try {
+          await run(statement);
+        } catch {
+          /* colonne déjà présente ou moteur sans ALTER ... IF NOT EXISTS */
+        }
+      }
       const [{ total }] = await run('select count(*)::int as total from realisations');
       if (Number(total) === 0) {
         for (const item of seed.realisations()) {
@@ -119,7 +130,7 @@ function readLocal() {
   try {
     return JSON.parse(fs.readFileSync(LOCAL_DB, 'utf8'));
   } catch {
-    const db = { users: [], orders: [], realisations: seed.realisations(), logs: [] };
+    const db = { users: [], orders: [], realisations: seed.realisations(), order_events: [], logs: [] };
     writeLocal(db);
     return db;
   }
@@ -240,10 +251,6 @@ const db = {
     await ensureSchema();
     await run(`delete from ${table} where id = $1`, [id]);
     return true;
-  },
-
-  async count(table, filters = {}) {
-    return (await this.select(table, filters)).length;
   },
 
   /** Réservé aux tests : remplace le pilote SQL par un moteur en mémoire. */

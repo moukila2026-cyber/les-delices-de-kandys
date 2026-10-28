@@ -66,12 +66,13 @@
         <div class="panel-head">
           <div>
             <h2>Commandes</h2>
-            <p>Suivez les demandes reçues depuis le site et faites avancer leur statut.</p>
+            <p>Suivez les demandes reçues depuis le site et faites avancer leur statut. Chaque changement de statut enregistre l’agent et l’heure du traitement.</p>
           </div>
           <div class="filters">
             <input type="search" id="orders-search" placeholder="Rechercher un nom, un numéro…" aria-label="Rechercher une commande">
             <select id="orders-status" aria-label="Filtrer par statut">
               <option value="">Tous les statuts</option>
+              <option value="a_traiter">À traiter</option>
               <option value="nouvelle">Nouvelles</option>
               <option value="en_cours">En cours</option>
               <option value="prete">Prêtes</option>

@@ -35,6 +35,8 @@ module.exports = async function handler(req, res) {
       orders_total: orders.length,
       orders_by_status: byStatus,
       orders_today: orders.filter((order) => (order.created_at || '').startsWith(new Date().toISOString().slice(0, 10))).length,
+      orders_pending: orders.filter((order) => !order.handled_at).length,
+      orders_handled: orders.filter((order) => Boolean(order.handled_at)).length,
       realisations: realisations.length,
       agents_active: agents.filter((agent) => agent.active).length,
     };
