@@ -75,7 +75,6 @@ const STATEMENTS = [
   'create index if not exists orders_created_at_idx on orders (created_at desc)',
   'create index if not exists orders_status_idx on orders (status)',
   'create index if not exists order_events_order_idx on order_events (order_id, created_at desc)',
-  'create index if not exists orders_handled_at_idx on orders (handled_at)',
   'create index if not exists realisations_position_idx on realisations (position)',
   'create index if not exists logs_created_at_idx on logs (created_at desc)',
 ];
@@ -93,6 +92,7 @@ const MIGRATIONS = [
   "alter table orders add column if not exists handled_by_name text default ''",
   "alter table orders add column if not exists handled_by_role text default ''",
   'alter table orders add column if not exists handled_at timestamptz',
+  'create index if not exists orders_handled_at_idx on orders (handled_at)',
 ];
 
 module.exports = { STATEMENTS, MIGRATIONS };
