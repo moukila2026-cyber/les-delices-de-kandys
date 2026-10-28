@@ -3,33 +3,123 @@
 /**
  * Couche de stockage du dashboard Kandys.
  *
- * Deux modes :
- *  1. Supabase (production)  → SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
- *  2. Fichier local (dev)    → KANDYS_DB_PATH, données non durables sur Vercel
+ *  1. Neon (PostgreSQL) → DATABASE_URL / POSTGRES_URL / NEON_DATABASE_URL
+ *     (ou PGHOST + PGDATABASE + PGUSER + PGPASSWORD)
+ *  2. Fichier local (secours) → KANDYS_DB_PATH, non durable sur Vercel
  */
 
 const fs = require('fs');
 const path = require('path');
+const seed = require('./seed');
+const { STATEMENTS } = require('./schema');
 
-const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const LOCAL_DB = process.env.KANDYS_DB_PATH || path.join('/tmp', 'kandys-db.json');
 
-const isSupabase = Boolean(SUPABASE_URL && SUPABASE_KEY);
+const COLUMNS = {
+  users: ['id', 'email', 'name', 'role', 'active', 'password_hash', 'created_at', 'updated_at', 'last_login'],
+  orders: ['id', 'nom', 'prenoms', 'telephone', 'localisation', 'type', 'description', 'status', 'note',
+    'created_at', 'updated_at', 'updated_by'],
+  realisations: ['id', 'category', 'title', 'caption', 'alt', 'image', 'position', 'visible',
+    'created_at', 'updated_at'],
+  logs: ['id', 'actor_id', 'actor_email', 'actor_role', 'action', 'target', 'details', 'created_at'],
+};
 
-/* ------------------------------------------------------------------ local -- */
+function connectionString() {
+  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+  if (process.env.POSTGRES_URL) return process.env.POSTGRES_URL;
+  if (process.env.NEON_DATABASE_URL) return process.env.NEON_DATABASE_URL;
+  if (process.env.PGHOST && process.env.PGDATABASE && process.env.PGUSER) {
+    const user = encodeURIComponent(process.env.PGUSER);
+    const password = process.env.PGPASSWORD ? `:${encodeURIComponent(process.env.PGPASSWORD)}` : '';
+    return `postgresql://${user}${password}@${process.env.PGHOST}/${process.env.PGDATABASE}?sslmode=require`;
+  }
+  return '';
+}
+
+const CONNECTION = connectionString();
+const usePostgres = Boolean(CONNECTION) || Boolean(process.env.KANDYS_FORCE_PG);
+
+/* ------------------------------------------------------------- PostgreSQL -- */
+
+let pool = null;
+let ready = null;
+let testRunner = null;
+
+function getPool() {
+  if (pool) return pool;
+  if (global.__kandysPool) {
+    pool = global.__kandysPool;
+    return pool;
+  }
+  let Pool;
+  try {
+    ({ Pool } = require('@neondatabase/serverless'));
+  } catch {
+    ({ Pool } = require('pg'));
+  }
+  pool = new Pool({ connectionString: CONNECTION, max: 3 });
+  global.__kandysPool = pool;
+  return pool;
+}
+
+async function run(text, params) {
+  if (testRunner) {
+    const rows = await testRunner(text, params || []);
+    return rows || [];
+  }
+  const { rows } = await getPool().query(text, params || []);
+  return rows;
+}
+
+/** Crée les tables au premier appel (idempotent) et amorce les réalisations. */
+function ensureSchema() {
+  if (!ready) {
+    ready = (async () => {
+      for (const statement of STATEMENTS) {
+        await run(statement);
+      }
+      const [{ total }] = await run('select count(*)::int as total from realisations');
+      if (Number(total) === 0) {
+        for (const item of seed.realisations()) {
+          await run(
+            `insert into realisations (id, category, title, caption, alt, image, position, visible, created_at)
+             values ($1, $2, $3, $4, $5, $6, $7, true, now())
+             on conflict (id) do nothing`,
+            [item.id, item.category, item.title, item.caption, item.alt, item.image, item.position],
+          );
+        }
+      }
+    })().catch((error) => {
+      ready = null; // nouvelle tentative au prochain appel
+      throw error;
+    });
+  }
+  return ready;
+}
+
+/** Les dates reviennent en Date : on les normalise en ISO pour l'API. */
+function normaliseRow(row) {
+  if (!row) return row;
+  const out = {};
+  Object.entries(row).forEach(([key, value]) => {
+    out[key] = value instanceof Date ? value.toISOString() : value;
+  });
+  return out;
+}
+
+function columnsOf(table) {
+  const columns = COLUMNS[table];
+  if (!columns) throw new Error(`Table inconnue : ${table}`);
+  return columns;
+}
+
+/* -------------------------------------------------------------------- local -- */
 
 function readLocal() {
   try {
     return JSON.parse(fs.readFileSync(LOCAL_DB, 'utf8'));
   } catch {
-    const seed = require('./seed');
-    const db = {
-      users: [],
-      orders: [],
-      realisations: seed.realisations(),
-      logs: [],
-    };
+    const db = { users: [], orders: [], realisations: seed.realisations(), logs: [] };
     writeLocal(db);
     return db;
   }
@@ -44,102 +134,111 @@ function writeLocal(db) {
   }
 }
 
-/* --------------------------------------------------------------- supabase -- */
-
-async function sb(pathname, options = {}) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/${pathname}`, {
-    method: options.method || 'GET',
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json',
-      Prefer: options.prefer || 'return=representation',
-      ...(options.headers || {}),
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
-  const text = await res.text();
-  const data = text ? JSON.parse(text) : null;
-  if (!res.ok) {
-    const message = (data && (data.message || data.hint)) || res.statusText;
-    throw new Error(`Supabase ${res.status}: ${message}`);
-  }
-  return data;
-}
-
-function q(filters = {}) {
-  const params = new URLSearchParams();
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') params.set(key, value);
-  });
-  const str = params.toString();
-  return str ? `?${str}` : '';
-}
-
-/* -------------------------------------------------------------------- api -- */
+/* ---------------------------------------------------------------------- api -- */
 
 const db = {
-  mode: isSupabase ? 'supabase' : 'local',
-  durable: isSupabase,
+  get mode() {
+    return usePostgres ? 'neon' : 'local';
+  },
+  /** Les données sont-elles conservées durablement en production ? */
+  get durable() {
+    return Boolean(CONNECTION) || Boolean(testRunner);
+  },
 
   async select(table, filters = {}, options = {}) {
-    if (isSupabase) {
-      const order = options.order ? `&order=${options.order}` : '';
-      return (await sb(`${table}${q(filters)}${order}`)) || [];
+    const columns = columnsOf(table);
+    if (!usePostgres) {
+      const local = readLocal();
+      let rows = [...(local[table] || [])];
+      Object.entries(filters).forEach(([key, value]) => {
+        if (!columns.includes(key) || value === undefined || value === null) return;
+        rows = rows.filter((row) => String(row[key]) === String(value));
+      });
+      if (options.order) {
+        const [field, dir] = options.order.split('.');
+        rows.sort((a, b) => (a[field] > b[field] ? 1 : a[field] < b[field] ? -1 : 0) * (dir === 'desc' ? -1 : 1));
+      }
+      return options.limit ? rows.slice(0, options.limit) : rows;
     }
-    const local = readLocal();
-    let rows = [...(local[table] || [])];
+
+    await ensureSchema();
+    const params = [];
+    const where = [];
     Object.entries(filters).forEach(([key, value]) => {
-      if (key === 'select' || key === 'order') return;
-      if (value === undefined || value === null) return;
-      rows = rows.filter((row) => String(row[key]) === String(value));
+      if (!columns.includes(key) || value === undefined || value === null) return;
+      params.push(value);
+      where.push(`${key} = $${params.length}`);
     });
+    let sql = `select * from ${table}`;
+    if (where.length) sql += ` where ${where.join(' and ')}`;
     if (options.order) {
       const [field, dir] = options.order.split('.');
-      rows.sort((a, b) => (a[field] > b[field] ? 1 : a[field] < b[field] ? -1 : 0) * (dir === 'desc' ? -1 : 1));
+      if (columns.includes(field)) {
+        sql += ` order by ${field} ${String(dir).toLowerCase() === 'desc' ? 'desc' : 'asc'}`;
+      }
     }
-    return options.limit ? rows.slice(0, options.limit) : rows;
+    if (options.limit) {
+      params.push(Number(options.limit));
+      sql += ` limit $${params.length}`;
+    }
+    const rows = await run(sql, params);
+    return rows.map(normaliseRow);
   },
 
   async findById(table, id) {
+    const columns = columnsOf(table);
+    if (!columns.includes('id')) return null;
     const rows = await this.select(table, { id });
     return rows[0] || null;
   },
 
   async insert(table, row) {
-    if (isSupabase) return (await sb(table, { method: 'POST', body: row }))[0];
-    const local = readLocal();
-    local[table] = local[table] || [];
-    local[table].push(row);
-    writeLocal(local);
-    return row;
+    const columns = columnsOf(table).filter((column) => row[column] !== undefined);
+    if (!usePostgres) {
+      const local = readLocal();
+      local[table] = local[table] || [];
+      local[table].push(row);
+      writeLocal(local);
+      return row;
+    }
+    await ensureSchema();
+    const placeholders = columns.map((_, index) => `$${index + 1}`);
+    const sql = `insert into ${table} (${columns.join(', ')}) values (${placeholders.join(', ')}) returning *`;
+    const rows = await run(sql, columns.map((column) => row[column]));
+    return normaliseRow(rows[0]) || row;
   },
 
   async update(table, id, patch) {
-    if (isSupabase) {
-      const rows = await sb(`${table}?id=eq.${encodeURIComponent(id)}`, {
-        method: 'PATCH',
-        body: patch,
-      });
-      return rows[0] || null;
+    const columns = columnsOf(table).filter((column) => column !== 'id' && patch[column] !== undefined);
+    if (!columns.length) return this.findById(table, id);
+    if (!usePostgres) {
+      const local = readLocal();
+      const rows = local[table] || [];
+      const index = rows.findIndex((row) => String(row.id) === String(id));
+      if (index === -1) return null;
+      rows[index] = { ...rows[index], ...patch };
+      writeLocal(local);
+      return rows[index];
     }
-    const local = readLocal();
-    const rows = local[table] || [];
-    const index = rows.findIndex((row) => String(row.id) === String(id));
-    if (index === -1) return null;
-    rows[index] = { ...rows[index], ...patch };
-    writeLocal(local);
-    return rows[index];
+    await ensureSchema();
+    const values = columns.map((column) => patch[column]);
+    values.push(id);
+    const sets = columns.map((column, index) => `${column} = $${index + 1}`);
+    const sql = `update ${table} set ${sets.join(', ')} where id = $${values.length} returning *`;
+    const rows = await run(sql, values);
+    return normaliseRow(rows[0]) || null;
   },
 
   async remove(table, id) {
-    if (isSupabase) {
-      await sb(`${table}?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
+    columnsOf(table);
+    if (!usePostgres) {
+      const local = readLocal();
+      local[table] = (local[table] || []).filter((row) => String(row.id) !== String(id));
+      writeLocal(local);
       return true;
     }
-    const local = readLocal();
-    local[table] = (local[table] || []).filter((row) => String(row.id) !== String(id));
-    writeLocal(local);
+    await ensureSchema();
+    await run(`delete from ${table} where id = $1`, [id]);
     return true;
   },
 
@@ -147,8 +246,14 @@ const db = {
     return (await this.select(table, filters)).length;
   },
 
+  /** Réservé aux tests : remplace le pilote SQL par un moteur en mémoire. */
+  __setRunnerForTests(fn) {
+    testRunner = fn;
+    if (fn) ready = null;
+  },
+
   reset() {
-    if (!isSupabase) {
+    if (!usePostgres) {
       try {
         fs.unlinkSync(LOCAL_DB);
       } catch {
