@@ -1,4 +1,4 @@
-# Les Délices de Kandys — site vitrine
+# Kandys Pâtisserie — site vitrine
 
 Site vitrine responsive en français, conçu en HTML/CSS/JavaScript sans dépendance externe. `premium.css` apporte les finitions visuelles, animations, ajustements responsive et le fond décoratif du site (`assets/fond-site.jpg`, source PNG disponible). Les images de référence et les 10 nouveaux visuels sont intégrés dans `assets/`. La section « Nos réalisations » les classe par cuisine africaine, cuisine européenne, entrées, pâtisserie, anniversaires et mariages.
 
@@ -23,7 +23,7 @@ Depuis la racine du projet, après avoir créé un dépôt GitHub vide :
 ```bash
 git init
 git add .
-git commit -m "Site vitrine Les Delices de Kandys"
+git commit -m "Site vitrine Kandys Pâtisserie"
 git branch -M main
 git remote add origin https://github.com/VOTRE-COMPTE/VOTRE-DEPOT.git
 git push -u origin main
