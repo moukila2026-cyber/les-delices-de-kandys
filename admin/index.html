@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#570d2b">
+  <title>Espace équipe — Kandys Pâtisserie</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <!-- ------------------------------------------------------------ connexion -->
+  <main class="auth-screen" id="auth-screen">
+    <form class="auth-card" id="login-form" autocomplete="on">
+      <div class="auth-brand">
+        <span class="brand-mark">KP</span>
+        <div>
+          <strong>Kandys Pâtisserie</strong>
+          <small>Espace équipe</small>
+        </div>
+      </div>
+      <h1>Connexion</h1>
+      <p class="auth-hint">Accès réservé à l’administrateur et à ses agents.</p>
+
+      <label>Adresse e-mail
+        <input type="email" name="email" id="login-email" required autocomplete="username" placeholder="vous@exemple.ci">
+      </label>
+      <label>Mot de passe
+        <input type="password" name="password" id="login-password" required autocomplete="current-password" placeholder="••••••••">
+      </label>
+      <p class="form-error" id="login-error" role="alert" hidden></p>
+      <button class="btn btn-primary" type="submit" id="login-submit">Se connecter</button>
+      <a class="auth-back" href="../index.html">← Retour au site</a>
+    </form>
+  </main>
+
+  <!-- ------------------------------------------------------------ dashboard -->
+  <div class="app" id="app" hidden>
+    <header class="app-header">
+      <div class="app-brand">
+        <span class="brand-mark">KP</span>
+        <div><strong>Kandys Pâtisserie</strong><small>Espace équipe</small></div>
+      </div>
+      <nav class="app-tabs" id="tabs" aria-label="Sections du dashboard">
+        <button type="button" class="tab is-active" data-tab="commandes">Commandes <span class="badge" id="tab-orders-badge" hidden>0</span></button>
+        <button type="button" class="tab" data-tab="realisations">Réalisations</button>
+        <button type="button" class="tab" data-tab="agents" data-admin-only>Agents</button>
+        <button type="button" class="tab" data-tab="journal" data-admin-only>Journal</button>
+        <button type="button" class="tab" data-tab="compte">Mon compte</button>
+      </nav>
+      <div class="app-user">
+        <span class="role" id="user-role">—</span>
+        <span class="who" id="user-name">—</span>
+        <button class="btn btn-ghost" type="button" id="logout">Déconnexion</button>
+      </div>
+    </header>
+
+    <p class="storage-warning" id="storage-warning" hidden>
+      Stockage temporaire : les données ne sont pas conservées durablement. Connectez une base
+      (Supabase) pour un usage réel — voir <code>SUPABASE_SETUP.md</code>.
+    </p>
+
+    <main class="app-main">
+      <!-- commandes -->
+      <section class="panel is-active" data-panel="commandes">
+        <div class="panel-head">
+          <div>
+            <h2>Commandes</h2>
+            <p>Suivez les demandes reçues depuis le site et faites avancer leur statut.</p>
+          </div>
+          <div class="filters">
+            <input type="search" id="orders-search" placeholder="Rechercher un nom, un numéro…" aria-label="Rechercher une commande">
+            <select id="orders-status" aria-label="Filtrer par statut">
+              <option value="">Tous les statuts</option>
+              <option value="nouvelle">Nouvelles</option>
+              <option value="en_cours">En cours</option>
+              <option value="prete">Prêtes</option>
+              <option value="livree">Livrées</option>
+              <option value="annulee">Annulées</option>
+            </select>
+            <button class="btn btn-ghost" type="button" id="orders-refresh">Actualiser</button>
+          </div>
+        </div>
+        <div class="order-list" id="orders-list"><p class="empty">Chargement…</p></div>
+      </section>
+
+      <!-- réalisations -->
+      <section class="panel" data-panel="realisations">
+        <div class="panel-head">
+          <div>
+            <h2>Réalisations</h2>
+            <p>Ajoutez, modifiez ou retirez les créations affichées sur le site.</p>
+          </div>
+          <button class="btn btn-primary" type="button" id="new-realisation" data-admin-only>+ Nouvelle réalisation</button>
+        </div>
+        <p class="role-note" id="realisations-role-note" hidden>
+          En tant qu’agent, vous pouvez consulter les réalisations. Modifications réservées à l’administrateur.
+        </p>
+        <div class="realisations-grid" id="realisations-grid"></div>
+      </section>
+
+      <!-- agents -->
+      <section class="panel" data-panel="agents">
+        <div class="panel-head">
+          <div>
+            <h2>Agents</h2>
+            <p>Trois comptes maximum. Ils gèrent les commandes, sans accès aux réglages sensibles.</p>
+          </div>
+          <span class="counter" id="agents-counter">0 / 3</span>
+        </div>
+        <form class="inline-form" id="agent-form">
+          <input type="text" name="name" placeholder="Nom de l’agent" required maxlength="80">
+          <input type="email" name="email" placeholder="E-mail" required>
+          <input type="password" name="password" placeholder="Mot de passe (8 caractères min.)" required minlength="8">
+          <button class="btn btn-primary" type="submit">Créer l’agent</button>
+        </form>
+        <p class="form-error" id="agent-error" role="alert" hidden></p>
+        <div class="agent-list" id="agents-list"></div>
+      </section>
+
+      <!-- journal -->
+      <section class="panel" data-panel="journal">
+        <div class="panel-head">
+          <div>
+            <h2>Journal & activité</h2>
+            <p>Tout ce qui se passe dans l’entreprise, même quand vous êtes absent.</p>
+          </div>
+          <button class="btn btn-ghost" type="button" id="logs-refresh">Actualiser</button>
+        </div>
+        <div class="stat-grid" id="stats"></div>
+        <div class="timeline" id="logs-list"></div>
+      </section>
+
+      <!-- compte -->
+      <section class="panel" data-panel="compte">
+        <div class="panel-head">
+          <div>
+            <h2>Mon compte</h2>
+            <p>Modifiez votre mot de passe. Huit caractères minimum.</p>
+          </div>
+        </div>
+        <form class="stack-form" id="password-form">
+          <label>Mot de passe actuel
+            <input type="password" name="current" required autocomplete="current-password">
+          </label>
+          <label>Nouveau mot de passe
+            <input type="password" name="next" required minlength="8" autocomplete="new-password">
+          </label>
+          <label>Confirmer le nouveau mot de passe
+            <input type="password" name="confirm" required minlength="8" autocomplete="new-password">
+          </label>
+          <p class="form-error" id="password-error" role="alert" hidden></p>
+          <p class="form-success" id="password-success" role="status" hidden></p>
+          <button class="btn btn-primary" type="submit">Enregistrer le mot de passe</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!-- ------------------------------------------------------- modale réalisation -->
+  <dialog class="modal" id="realisation-modal">
+    <form method="dialog" class="modal-card" id="realisation-form">
+      <h3 id="realisation-modal-title">Nouvelle réalisation</h3>
+      <input type="hidden" name="id">
+      <div class="modal-grid">
+        <label class="upload">
+          <span>Aperçu</span>
+          <img id="realisation-preview" alt="" hidden>
+          <input type="file" accept="image/*" id="realisation-file">
+          <small>Photo compressée automatiquement (max 2,5 Mo).</small>
+        </label>
+        <div class="stack-form">
+          <label>Titre affiché sur la photo
+            <input type="text" name="title" required maxlength="90" placeholder="Ex. Assiettes généreuses">
+          </label>
+          <label>Catégorie
+            <select name="category" required>
+              <option value="africain">Cuisine africaine</option>
+              <option value="europeen">Cuisine européenne</option>
+              <option value="entrees">Entrées</option>
+              <option value="patisserie">Pâtisserie</option>
+              <option value="anniversaire">Anniversaire</option>
+              <option value="mariage">Mariage</option>
+            </select>
+          </label>
+          <label>Légende courte
+            <input type="text" name="caption" maxlength="60" placeholder="Ex. Cuisine africaine">
+          </label>
+          <label>Description (accessibilité)
+            <input type="text" name="alt" maxlength="160" placeholder="Décrivez la photo">
+          </label>
+          <label class="switch">
+            <input type="checkbox" name="visible" checked> Visible sur le site
+          </label>
+        </div>
+      </div>
+      <p class="form-error" id="realisation-error" role="alert" hidden></p>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" type="button" id="realisation-cancel">Annuler</button>
+        <button class="btn btn-primary" type="submit">Enregistrer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+  <script src="admin.js"></script>
+</body>
+</html>

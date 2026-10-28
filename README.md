@@ -14,7 +14,51 @@ Puis ouvrir `http://localhost:8080`.
 
 ## Formulaire de commande
 
-Le formulaire est 100 % côté navigateur : il prépare un message avec les champs saisis et l’ouvre dans le WhatsApp du restaurant (+225 01 02 15 03 03). Le client confirme l’envoi dans WhatsApp. Aucune commande n’est stockée sur le site et aucun backend/Supabase n’est nécessaire.
+Le formulaire prépare un message avec les champs saisis et l’ouvre dans le WhatsApp du
+restaurant (+225 01 02 15 03 03) ; le client confirme l’envoi. En parallèle, la demande est
+enregistrée via `POST /api/orders` pour apparaître dans **l’espace équipe**.
+
+## Espace équipe (dashboard)
+
+Adresse : `/admin/` (lien discret « Espace équipe » dans le pied de page du site).
+
+| Rôle | Droits |
+| --- | --- |
+| **Administrateur** (1 seul compte) | tout : commandes (statuts, notes, suppression), réalisations (ajout, modification, suppression, masquage), création/désactivation/suppression des **3 agents** maximum, journal d’activité et statistiques |
+| **Agent** (3 comptes maximum) | consultation des commandes, changement de statut et notes internes, lecture des réalisations, modification de son propre mot de passe |
+
+- Authentification e-mail + mot de passe, mots de passe hachés (scrypt) et session
+  signée en cookie `HttpOnly` (8 h), limitation des tentatives de connexion.
+- Chaque action est tracée dans le journal (qui, quoi, quand), consultable par
+  l’administrateur même à distance.
+
+### Configuration
+
+Variables d’environnement (Vercel → Settings → Environment Variables) :
+
+| Nom | Rôle |
+| --- | --- |
+| `ADMIN_EMAIL` | e-mail du compte administrateur |
+| `ADMIN_PASSWORD_HASH` | empreinte scrypt du mot de passe administrateur (ou `ADMIN_PASSWORD` en clair pour un test) |
+| `SESSION_SECRET` | clé de signature des sessions (chaîne aléatoire longue) |
+| `SUPABASE_URL` | base de données (voir [`SUPABASE_SETUP.md`](SUPABASE_SETUP.md)) |
+| `SUPABASE_SERVICE_ROLE_KEY` | clé serveur Supabase |
+
+Sans Supabase, les données sont écrites dans un fichier temporaire : pratique en local,
+non durable en production. Le dashboard affiche alors un avertissement.
+
+### Développement local
+
+```bash
+ADMIN_EMAIL=admin@kandys.ci ADMIN_PASSWORD='MotDePasseTest!' \
+SESSION_SECRET=secret-local node tools/dev-server.js 8080
+```
+
+Le serveur sert le site, `/admin/` et les fonctions `/api/`. Pour régénérer une empreinte :
+
+```bash
+node -e "const c=require('crypto');const s=c.randomBytes(16).toString('hex');console.log('scrypt$'+s+'$'+c.scryptSync('VOTRE_MOT_DE_PASSE',s,64).toString('hex'))"
+```
 
 ## Déploiement GitHub → Vercel
 
